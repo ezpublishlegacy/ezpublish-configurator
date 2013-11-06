@@ -1,0 +1,147 @@
+<?php
+
+namespace Psd\Ezpublish\Configurator;
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
+
+class Configurator {
+
+    public function __construct()
+    {
+        $console = new Application();
+
+        $console
+            ->register('update-configuration')
+            ->setDefinition(
+                array(
+                    new InputArgument('configuration-file', InputArgument::REQUIRED, 'The configuration file.'),
+                    new InputArgument('ezpublish-root', InputArgument::REQUIRED, 'The eZ Publish root directory.')
+                )
+            )
+            ->setDescription('Updates eZ publish configuration.')
+            ->setHelp($this->getHelp())
+            ->setCode(array($this, 'execute'));
+        $console->run();
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
+        $this->validateInput($input, $output);
+
+        $root_dir = $input->getArgument('ezpublish-root');
+
+        $file = $input->getArgument('configuration-file');
+        $config = file_get_contents($file);
+        $config = Yaml::parse($config);
+
+        if (!$config || empty($config['settings'])) {
+            $output->writeln($this->getErrorText('Your configuration file does not contain settings key. Sample:'));
+            exit(1);
+        }
+
+        // Change dir to ezpublish root.
+        // Dirty hack for eZ.
+        $current_dir = getcwd();
+        chdir($root_dir);
+
+        // First rewrite all INI files that should be overwritten.
+        foreach ($config['settings'] as $file => $values) {
+
+            $file = sprintf('settings/%s', $file);
+
+            // Check if files are available.
+            if (file_exists($file) === false) {
+                throw new \Exception(sprintf('File not found %s.', $file));
+            }
+
+            $ini = \eZINI::fetchFromFile($file);
+
+            $blockValueKeys = array_keys($values);
+
+            foreach ($blockValueKeys as $block) {
+
+
+                $blockValues = array_merge($ini->BlockValues[$block], $values[$block]);
+                $ini->BlockValues[$block] = $blockValues;
+                $ini->save(realpath($file), false, false, false, true, true, true);
+            }
+        }
+
+        // Rechange to previous directory.
+        chdir($current_dir);
+    }
+
+    protected function validateInput(InputInterface $input, OutputInterface $output)
+    {
+        $root_dir      = $input->getArgument('ezpublish-root');
+        $autoload_file = $root_dir.'/'.'autoload.php';
+
+        if (is_dir(realpath($root_dir)) === false) {
+            $msg = sprintf('Could not find eZPublish root directory "%s".', realpath($root_dir));
+            $output->writeln('<error>'.$msg.'</error>');
+            exit(1);
+        }
+
+        if (is_file(realpath($autoload_file)) === false) {
+            $msg = sprintf(
+                'Could not find autoload.php file. Probably you do not point to a eZ Publish root directory.',
+                $root_dir
+            );
+            $output->writeln('<error>'.$msg.'</error>');
+            exit(1);
+        }
+
+        include $autoload_file;
+    }
+
+    protected function getFilename()
+    {
+
+    }
+
+    protected function getErrorText($prolog)
+    {
+        $error = <<<EOF
+
+${prolog}
+
+<error>{$this->getHelp()}</error>
+EOF;
+
+        return $error;
+    }
+
+    protected function getHelp()
+    {
+        $help = <<<EOF
+
+# Sample configuration file for eZPublish 4.
+settings:
+    # The settings file to override
+    override/site.ini.append.php:
+        # Defines block values that can be overwritten.
+        DatabaseSettings:
+            # The variable that can be overwritten.
+            Server: 127.0.0.1
+            Port: 3306
+            User: dbuser
+            Password: dbpassword
+            Database: ez_db
+            Charset: utf8
+            Socket: /var/lib/mysql/mysql.sock
+        SiteSettings:
+            SiteName: Site Name
+            SiteURL: localhost
+
+
+EOF;
+        return $help;
+    }
+
+}
+

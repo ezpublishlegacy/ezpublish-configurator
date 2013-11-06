@@ -1,0 +1,29 @@
+{
+    "name": "psd/ezpublish-configurator",
+    "description": "PSD binary to configure an eZPublish 4 installation.",
+    "keywords": ["configuration", "ezpublish"],
+    "homepage": "http://www.prosiebensat1digital.de/",
+    "authors": [
+        {
+            "name": "ProSiebenSat.1 Digital GmbH",
+            "homepage": "http://www.prosiebensat1digital.de/"
+        }
+    ],
+    "minimum-stability": "dev",
+    "bin": ["bin/configurator"],
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/console": "2.3.*",
+        "symfony/yaml": "2.3.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Psd\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "master"
+        }
+    }
+}

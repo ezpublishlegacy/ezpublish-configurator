@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+$composer_autoloads = __DIR__.'/../vendor/autoload.php';
+
+if (file_exists($composer_autoloads) === false) {
+    $test =  <<<EOF
+You need to run "composer install" before running this script.
+
+EOF;
+    echo $test;
+    exit(1);
+}
+
+require $composer_autoloads;
+
+new \Psd\Ezpublish\Configurator\Configurator();
