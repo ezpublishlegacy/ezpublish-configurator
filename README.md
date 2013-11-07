@@ -7,6 +7,7 @@ Provides:
 
 * Avoid duplication of site access configurations, that differ only in some parts.
 * Keeps sensitive data like database credentials, api keys out of scm.
+* No kernel hacks.
 
 ## Install
 
