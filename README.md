@@ -9,6 +9,10 @@ Provides:
 * Keeps sensitive data like database credentials, api keys out of scm.
 * No kernel hacks.
 
+Requirements:
+
+* There is a dependency to eZ Publish 4 `\eZINI` class, that currently cannot be covered by composer. So you must point to a valid eZ document root (see usage).
+
 ## Install
 
 
