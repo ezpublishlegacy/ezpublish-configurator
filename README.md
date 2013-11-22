@@ -37,19 +37,21 @@ Add the library to your project (e.g. via [Composer](http://getcomposer.org/))
 Here is a small configuration file that holds sensitive database credentials.
 
 ```yaml
-settings:
-    # The settings file to override
-    override/site.ini.append.php:
-        # Defines block values that can be overwritten.
-        DatabaseSettings:
-            # The variable that can be overwritten.
-            Server: 127.0.0.1
-            Port: 3306
-            User: dbuser
-            Password: dbpassword
-            Database: ez_db
-            Charset: utf8
-            Socket: /var/lib/mysql/mysql.sock
+# The settings file to override
+settings/override/site.ini.append.php:
+    # Defines block values that can be overwritten.
+    DatabaseSettings:
+        # The variable that can be overwritten.
+        Server: 127.0.0.1
+        Port: 3306
+        User: dbuser
+        Password: dbpassword
+        Database: ez_db
+        Charset: utf8
+        Socket: /var/lib/mysql/mysql.sock
+extension/myextension/settings/site.ini.append.php:
+    MyBlock:
+        MyVar: true
 ```
 
 ## Usage
