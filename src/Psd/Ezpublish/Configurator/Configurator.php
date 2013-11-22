@@ -39,21 +39,13 @@ class Configurator {
         $config = file_get_contents($file);
         $config = Yaml::parse($config);
 
-        if (!$config || empty($config['settings'])) {
-            $output->writeln($this->getErrorText('Your configuration file does not contain settings key. Sample:'));
-            exit(1);
-        }
-
         // Change dir to ezpublish root.
         // Dirty hack for eZ.
         $current_dir = getcwd();
         chdir($root_dir);
 
         // First rewrite all INI files that should be overwritten.
-        foreach ($config['settings'] as $file => $values) {
-
-            $file = sprintf('settings/%s', $file);
-
+        foreach ($config as $file => $values) {
             // Check if files are available.
             if (file_exists($file) === false) {
                 throw new \Exception(sprintf('File not found %s.', $file));
@@ -65,8 +57,11 @@ class Configurator {
 
             foreach ($blockValueKeys as $block) {
 
-
-                $blockValues = array_merge($ini->BlockValues[$block], $values[$block]);
+                if (isset($ini->BlockValues[$block])) {
+                    $blockValues = array_merge($ini->BlockValues[$block], $values[$block]);
+                } else {
+                    $blockValues = $values[$block];
+                }
                 $ini->BlockValues[$block] = $blockValues;
                 $ini->save(realpath($file), false, false, false, true, true, true);
             }
@@ -121,23 +116,28 @@ EOF;
         $help = <<<EOF
 
 # Sample configuration file for eZPublish 4.
-settings:
-    # The settings file to override
-    override/site.ini.append.php:
-        # Defines block values that can be overwritten.
-        DatabaseSettings:
-            # The variable that can be overwritten.
-            Server: 127.0.0.1
-            Port: 3306
-            User: dbuser
-            Password: dbpassword
-            Database: ez_db
-            Charset: utf8
-            Socket: /var/lib/mysql/mysql.sock
-        SiteSettings:
-            SiteName: Site Name
-            SiteURL: localhost
-
+# The settings file to override
+settings/override/site.ini.append.php:
+    # Defines block values that can be overwritten.
+    DatabaseSettings:
+        # The variable that can be overwritten.
+        Server: 127.0.0.1
+        Port: 3306
+        User: dbuser
+        Password: dbpassword
+        Database: ez_db
+        Charset: utf8
+        Socket: /var/lib/mysql/mysql.sock
+    SiteSettings:
+        SiteName: Site Name
+        SiteURL: localhost
+extension/mydesign/settings/site.ini:
+    DatabaseSettings:
+        # The variable that can be overwritten.
+        Server: 127.0.0.1
+        Port: 3306
+        User: dbuser
+        Password: dbpassword
 
 EOF;
         return $help;

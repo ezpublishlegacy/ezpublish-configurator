@@ -7,7 +7,6 @@ $files = array(
 );
 
 foreach ($files as $file) {
-    echo realpath($file)."\n";
     if (file_exists($file)) {
         require $file;
 
