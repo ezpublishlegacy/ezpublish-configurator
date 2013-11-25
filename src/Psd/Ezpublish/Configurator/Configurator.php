@@ -37,7 +37,7 @@ class Configurator {
 
         $file = $input->getArgument('configuration-file');
         $config = file_get_contents($file);
-        $config = Yaml::parse($config);
+        $directories = Yaml::parse($config);
 
         // Change dir to ezpublish root.
         // Dirty hack for eZ.
@@ -45,25 +45,28 @@ class Configurator {
         chdir($root_dir);
 
         // First rewrite all INI files that should be overwritten.
-        foreach ($config as $file => $values) {
-            // Check if files are available.
-            if (file_exists($file) === false) {
-                throw new \Exception(sprintf('File not found %s.', $file));
-            }
-
-            $ini = \eZINI::fetchFromFile($file);
-
-            $blockValueKeys = array_keys($values);
-
-            foreach ($blockValueKeys as $block) {
-
-                if (isset($ini->BlockValues[$block])) {
-                    $blockValues = array_merge($ini->BlockValues[$block], $values[$block]);
-                } else {
-                    $blockValues = $values[$block];
+        foreach ($directories as $directory => $fileConfig) {
+            foreach ($fileConfig as $filename => $config) {
+                // Check if files are available.
+                $file = sprintf('%s/%s', $directory, $filename);
+                if (file_exists($file) === false) {
+                    throw new \Exception(sprintf('File not found "%s", cannot overwrite block values in ini file.', $file));
                 }
-                $ini->BlockValues[$block] = $blockValues;
-                $ini->save(realpath($file), false, false, false, true, true, true);
+
+                $ini = \eZINI::fetchFromFile($file);
+
+                $blockValueKeys = array_keys($config);
+
+                foreach ($blockValueKeys as $block) {
+
+                    if (isset($ini->BlockValues[$block])) {
+                        $blockValues = array_merge($ini->BlockValues[$block], $config[$block]);
+                    } else {
+                        $blockValues = $config[$block];
+                    }
+                    $ini->BlockValues[$block] = $blockValues;
+                    $ini->save(realpath($file), false, false, false, true, true, true);
+                }
             }
         }
 
@@ -117,27 +120,29 @@ EOF;
 
 # Sample configuration file for eZPublish 4.
 # The settings file to override
-settings/override/site.ini.append.php:
-    # Defines block values that can be overwritten.
-    DatabaseSettings:
-        # The variable that can be overwritten.
-        Server: 127.0.0.1
-        Port: 3306
-        User: dbuser
-        Password: dbpassword
-        Database: ez_db
-        Charset: utf8
-        Socket: /var/lib/mysql/mysql.sock
-    SiteSettings:
-        SiteName: Site Name
-        SiteURL: localhost
-extension/mydesign/settings/site.ini:
-    DatabaseSettings:
-        # The variable that can be overwritten.
-        Server: 127.0.0.1
-        Port: 3306
-        User: dbuser
-        Password: dbpassword
+settings/override:
+    site.ini.append.php:
+        # Defines block values that can be overwritten.
+        DatabaseSettings:
+            # The variable that can be overwritten.
+            Server: 127.0.0.1
+            Port: 3306
+            User: dbuser
+            Password: dbpassword
+            Database: ez_db
+            Charset: utf8
+            Socket: /var/lib/mysql/mysql.sock
+        SiteSettings:
+            SiteName: Site Name
+            SiteURL: localhost
+extension/mydesign/settings:
+    site.ini:
+        DatabaseSettings:
+            # The variable that can be overwritten.
+            Server: 127.0.0.1
+            Port: 3306
+            User: dbuser
+            Password: dbpassword
 
 EOF;
         return $help;
