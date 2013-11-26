@@ -59,14 +59,14 @@ class Configurator {
 
                 foreach ($blockValueKeys as $block) {
 
-                    if (isset($ini->BlockValues[$block])) {
+                    if (isset($ini->BlockValues[$block]) === true) {
                         $blockValues = array_merge($ini->BlockValues[$block], $config[$block]);
                     } else {
                         $blockValues = $config[$block];
                     }
                     $ini->BlockValues[$block] = $blockValues;
-                    $ini->save(realpath($file), false, false, false, true, true, true);
                 }
+                $ini->save(realpath($file), false, false, false, true, false, true);
             }
         }
 
