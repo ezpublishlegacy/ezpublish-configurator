@@ -9,13 +9,12 @@
             "homepage": "http://www.prosiebensat1digital.de/"
         }
     ],
-    "minimum-stability": "dev",
     "bin": ["bin/configurator"],
     "require": {
         "php": ">=5.3.3",
-        "symfony/console": "2.3.*",
-        "symfony/yaml": "2.3.*",
-        "monolog/monolog": "~1.7.0"
+        "symfony/console": "~2.3",
+        "symfony/yaml": "~2.3",
+        "monolog/monolog": "~1.7"
     },
     "autoload": {
         "psr-0": {
