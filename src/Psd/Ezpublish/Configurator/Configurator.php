@@ -72,7 +72,7 @@ class Configurator
                     continue;
                 }
 
-                $ini = \eZINI::fetchFromFile($file);
+                $ini = \eZINI::instance($filename, $directory, null, null, null, true, true);
 
                 $blockValueKeys = array_keys($config);
 
@@ -85,11 +85,18 @@ class Configurator
                     }
                     $ini->BlockValues[$block] = $blockValues;
                 }
-                $ini->save(realpath($file), false, false, false, true, false, true);
-                $this->logger->log(
-                    Logger::INFO,
-                    "Updated ezpublish INI \"{$file}\" with settings from {$ymlFile}"
-                );
+
+                if ($ini->save($filename)) {
+                    $this->logger->log(
+                        Logger::INFO,
+                        "Updated ezpublish INI \"{$file}\" with settings from {$ymlFile}"
+                    );
+                } else {
+                    $this->logger->log(
+                        Logger::ERROR,
+                        "Can not update ezpublish INI \"{$file}\" with settings from {$ymlFile}"
+                    );
+                }
             }
         }
 
