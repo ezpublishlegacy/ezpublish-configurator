@@ -2,7 +2,6 @@
 
 namespace Psd\Ezpublish\Configurator;
 
-use foo\bar\Exception;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Console\Application;
