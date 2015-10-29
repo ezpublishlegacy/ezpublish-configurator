@@ -72,7 +72,7 @@ class Configurator
                     continue;
                 }
 
-                $ini = \eZINI::instance($filename, $directory, null, null, null, true, true);
+                $ini = \eZINI::instance($filename, $directory, null, false, null, true, true);
 
                 $blockValueKeys = array_keys($config);
 
